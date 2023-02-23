@@ -1,5 +1,6 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
+import { BuyOrderBook } from "./buy_order_book";
 import { Params } from "./params";
 import { SellOrderBook } from "./sell_order_book";
 
@@ -9,12 +10,13 @@ export const protobufPackage = "interchange.dex";
 export interface GenesisState {
   params: Params | undefined;
   portId: string;
-  /** this line is used by starport scaffolding # genesis/proto/state */
   sellOrderBookList: SellOrderBook[];
+  /** this line is used by starport scaffolding # genesis/proto/state */
+  buyOrderBookList: BuyOrderBook[];
 }
 
 function createBaseGenesisState(): GenesisState {
-  return { params: undefined, portId: "", sellOrderBookList: [] };
+  return { params: undefined, portId: "", sellOrderBookList: [], buyOrderBookList: [] };
 }
 
 export const GenesisState = {
@@ -27,6 +29,9 @@ export const GenesisState = {
     }
     for (const v of message.sellOrderBookList) {
       SellOrderBook.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    for (const v of message.buyOrderBookList) {
+      BuyOrderBook.encode(v!, writer.uint32(34).fork()).ldelim();
     }
     return writer;
   },
@@ -47,6 +52,9 @@ export const GenesisState = {
         case 3:
           message.sellOrderBookList.push(SellOrderBook.decode(reader, reader.uint32()));
           break;
+        case 4:
+          message.buyOrderBookList.push(BuyOrderBook.decode(reader, reader.uint32()));
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -62,6 +70,9 @@ export const GenesisState = {
       sellOrderBookList: Array.isArray(object?.sellOrderBookList)
         ? object.sellOrderBookList.map((e: any) => SellOrderBook.fromJSON(e))
         : [],
+      buyOrderBookList: Array.isArray(object?.buyOrderBookList)
+        ? object.buyOrderBookList.map((e: any) => BuyOrderBook.fromJSON(e))
+        : [],
     };
   },
 
@@ -74,6 +85,11 @@ export const GenesisState = {
     } else {
       obj.sellOrderBookList = [];
     }
+    if (message.buyOrderBookList) {
+      obj.buyOrderBookList = message.buyOrderBookList.map((e) => e ? BuyOrderBook.toJSON(e) : undefined);
+    } else {
+      obj.buyOrderBookList = [];
+    }
     return obj;
   },
 
@@ -84,6 +100,7 @@ export const GenesisState = {
       : undefined;
     message.portId = object.portId ?? "";
     message.sellOrderBookList = object.sellOrderBookList?.map((e) => SellOrderBook.fromPartial(e)) || [];
+    message.buyOrderBookList = object.buyOrderBookList?.map((e) => BuyOrderBook.fromPartial(e)) || [];
     return message;
   },
 };

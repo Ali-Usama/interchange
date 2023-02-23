@@ -3,9 +3,10 @@ import { Client, registry, MissingWalletError } from 'interchange-client-ts'
 import { DexPacketData } from "interchange-client-ts/interchange.dex/types"
 import { NoData } from "interchange-client-ts/interchange.dex/types"
 import { Params } from "interchange-client-ts/interchange.dex/types"
+import { SellOrderBook } from "interchange-client-ts/interchange.dex/types"
 
 
-export { DexPacketData, NoData, Params };
+export { DexPacketData, NoData, Params, SellOrderBook };
 
 function initClient(vuexGetters) {
 	return new Client(vuexGetters['common/env/getEnv'], vuexGetters['common/wallet/signer'])
@@ -37,11 +38,14 @@ function getStructure(template) {
 const getDefaultState = () => {
 	return {
 				Params: {},
+				SellOrderBook: {},
+				SellOrderBookAll: {},
 				
 				_Structure: {
 						DexPacketData: getStructure(DexPacketData.fromPartial({})),
 						NoData: getStructure(NoData.fromPartial({})),
 						Params: getStructure(Params.fromPartial({})),
+						SellOrderBook: getStructure(SellOrderBook.fromPartial({})),
 						
 		},
 		_Registry: registry,
@@ -75,6 +79,18 @@ export default {
 						(<any> params).query=null
 					}
 			return state.Params[JSON.stringify(params)] ?? {}
+		},
+				getSellOrderBook: (state) => (params = { params: {}}) => {
+					if (!(<any> params).query) {
+						(<any> params).query=null
+					}
+			return state.SellOrderBook[JSON.stringify(params)] ?? {}
+		},
+				getSellOrderBookAll: (state) => (params = { params: {}}) => {
+					if (!(<any> params).query) {
+						(<any> params).query=null
+					}
+			return state.SellOrderBookAll[JSON.stringify(params)] ?? {}
 		},
 				
 		getTypeStructure: (state) => (type) => {
@@ -127,6 +143,54 @@ export default {
 				return getters['getParams']( { params: {...key}, query}) ?? {}
 			} catch (e) {
 				throw new Error('QueryClient:QueryParams API Node Unavailable. Could not perform query: ' + e.message)
+				
+			}
+		},
+		
+		
+		
+		
+		 		
+		
+		
+		async QuerySellOrderBook({ commit, rootGetters, getters }, { options: { subscribe, all} = { subscribe:false, all:false}, params, query=null }) {
+			try {
+				const key = params ?? {};
+				const client = initClient(rootGetters);
+				let value= (await client.InterchangeDex.query.querySellOrderBook( key.index)).data
+				
+					
+				commit('QUERY', { query: 'SellOrderBook', key: { params: {...key}, query}, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QuerySellOrderBook', payload: { options: { all }, params: {...key},query }})
+				return getters['getSellOrderBook']( { params: {...key}, query}) ?? {}
+			} catch (e) {
+				throw new Error('QueryClient:QuerySellOrderBook API Node Unavailable. Could not perform query: ' + e.message)
+				
+			}
+		},
+		
+		
+		
+		
+		 		
+		
+		
+		async QuerySellOrderBookAll({ commit, rootGetters, getters }, { options: { subscribe, all} = { subscribe:false, all:false}, params, query=null }) {
+			try {
+				const key = params ?? {};
+				const client = initClient(rootGetters);
+				let value= (await client.InterchangeDex.query.querySellOrderBookAll(query ?? undefined)).data
+				
+					
+				while (all && (<any> value).pagination && (<any> value).pagination.next_key!=null) {
+					let next_values=(await client.InterchangeDex.query.querySellOrderBookAll({...query ?? {}, 'pagination.key':(<any> value).pagination.next_key} as any)).data
+					value = mergeResults(value, next_values);
+				}
+				commit('QUERY', { query: 'SellOrderBookAll', key: { params: {...key}, query}, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QuerySellOrderBookAll', payload: { options: { all }, params: {...key},query }})
+				return getters['getSellOrderBookAll']( { params: {...key}, query}) ?? {}
+			} catch (e) {
+				throw new Error('QueryClient:QuerySellOrderBookAll API Node Unavailable. Could not perform query: ' + e.message)
 				
 			}
 		},

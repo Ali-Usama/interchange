@@ -1,6 +1,8 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
+import { PageRequest, PageResponse } from "../../cosmos/base/query/v1beta1/pagination";
 import { Params } from "./params";
+import { SellOrderBook } from "./sell_order_book";
 
 export const protobufPackage = "interchange.dex";
 
@@ -12,6 +14,23 @@ export interface QueryParamsRequest {
 export interface QueryParamsResponse {
   /** params holds all the parameters of this module. */
   params: Params | undefined;
+}
+
+export interface QueryGetSellOrderBookRequest {
+  index: string;
+}
+
+export interface QueryGetSellOrderBookResponse {
+  sellOrderBook: SellOrderBook | undefined;
+}
+
+export interface QueryAllSellOrderBookRequest {
+  pagination: PageRequest | undefined;
+}
+
+export interface QueryAllSellOrderBookResponse {
+  sellOrderBook: SellOrderBook[];
+  pagination: PageResponse | undefined;
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -102,10 +121,232 @@ export const QueryParamsResponse = {
   },
 };
 
+function createBaseQueryGetSellOrderBookRequest(): QueryGetSellOrderBookRequest {
+  return { index: "" };
+}
+
+export const QueryGetSellOrderBookRequest = {
+  encode(message: QueryGetSellOrderBookRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.index !== "") {
+      writer.uint32(10).string(message.index);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetSellOrderBookRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetSellOrderBookRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.index = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetSellOrderBookRequest {
+    return { index: isSet(object.index) ? String(object.index) : "" };
+  },
+
+  toJSON(message: QueryGetSellOrderBookRequest): unknown {
+    const obj: any = {};
+    message.index !== undefined && (obj.index = message.index);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryGetSellOrderBookRequest>, I>>(object: I): QueryGetSellOrderBookRequest {
+    const message = createBaseQueryGetSellOrderBookRequest();
+    message.index = object.index ?? "";
+    return message;
+  },
+};
+
+function createBaseQueryGetSellOrderBookResponse(): QueryGetSellOrderBookResponse {
+  return { sellOrderBook: undefined };
+}
+
+export const QueryGetSellOrderBookResponse = {
+  encode(message: QueryGetSellOrderBookResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.sellOrderBook !== undefined) {
+      SellOrderBook.encode(message.sellOrderBook, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetSellOrderBookResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetSellOrderBookResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.sellOrderBook = SellOrderBook.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetSellOrderBookResponse {
+    return { sellOrderBook: isSet(object.sellOrderBook) ? SellOrderBook.fromJSON(object.sellOrderBook) : undefined };
+  },
+
+  toJSON(message: QueryGetSellOrderBookResponse): unknown {
+    const obj: any = {};
+    message.sellOrderBook !== undefined
+      && (obj.sellOrderBook = message.sellOrderBook ? SellOrderBook.toJSON(message.sellOrderBook) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryGetSellOrderBookResponse>, I>>(
+    object: I,
+  ): QueryGetSellOrderBookResponse {
+    const message = createBaseQueryGetSellOrderBookResponse();
+    message.sellOrderBook = (object.sellOrderBook !== undefined && object.sellOrderBook !== null)
+      ? SellOrderBook.fromPartial(object.sellOrderBook)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryAllSellOrderBookRequest(): QueryAllSellOrderBookRequest {
+  return { pagination: undefined };
+}
+
+export const QueryAllSellOrderBookRequest = {
+  encode(message: QueryAllSellOrderBookRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.pagination !== undefined) {
+      PageRequest.encode(message.pagination, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryAllSellOrderBookRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryAllSellOrderBookRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.pagination = PageRequest.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryAllSellOrderBookRequest {
+    return { pagination: isSet(object.pagination) ? PageRequest.fromJSON(object.pagination) : undefined };
+  },
+
+  toJSON(message: QueryAllSellOrderBookRequest): unknown {
+    const obj: any = {};
+    message.pagination !== undefined
+      && (obj.pagination = message.pagination ? PageRequest.toJSON(message.pagination) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryAllSellOrderBookRequest>, I>>(object: I): QueryAllSellOrderBookRequest {
+    const message = createBaseQueryAllSellOrderBookRequest();
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageRequest.fromPartial(object.pagination)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryAllSellOrderBookResponse(): QueryAllSellOrderBookResponse {
+  return { sellOrderBook: [], pagination: undefined };
+}
+
+export const QueryAllSellOrderBookResponse = {
+  encode(message: QueryAllSellOrderBookResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.sellOrderBook) {
+      SellOrderBook.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.pagination !== undefined) {
+      PageResponse.encode(message.pagination, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryAllSellOrderBookResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryAllSellOrderBookResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.sellOrderBook.push(SellOrderBook.decode(reader, reader.uint32()));
+          break;
+        case 2:
+          message.pagination = PageResponse.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryAllSellOrderBookResponse {
+    return {
+      sellOrderBook: Array.isArray(object?.sellOrderBook)
+        ? object.sellOrderBook.map((e: any) => SellOrderBook.fromJSON(e))
+        : [],
+      pagination: isSet(object.pagination) ? PageResponse.fromJSON(object.pagination) : undefined,
+    };
+  },
+
+  toJSON(message: QueryAllSellOrderBookResponse): unknown {
+    const obj: any = {};
+    if (message.sellOrderBook) {
+      obj.sellOrderBook = message.sellOrderBook.map((e) => e ? SellOrderBook.toJSON(e) : undefined);
+    } else {
+      obj.sellOrderBook = [];
+    }
+    message.pagination !== undefined
+      && (obj.pagination = message.pagination ? PageResponse.toJSON(message.pagination) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryAllSellOrderBookResponse>, I>>(
+    object: I,
+  ): QueryAllSellOrderBookResponse {
+    const message = createBaseQueryAllSellOrderBookResponse();
+    message.sellOrderBook = object.sellOrderBook?.map((e) => SellOrderBook.fromPartial(e)) || [];
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageResponse.fromPartial(object.pagination)
+      : undefined;
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse>;
+  /** Queries a SellOrderBook by index. */
+  SellOrderBook(request: QueryGetSellOrderBookRequest): Promise<QueryGetSellOrderBookResponse>;
+  /** Queries a list of SellOrderBook items. */
+  SellOrderBookAll(request: QueryAllSellOrderBookRequest): Promise<QueryAllSellOrderBookResponse>;
 }
 
 export class QueryClientImpl implements Query {
@@ -113,11 +354,25 @@ export class QueryClientImpl implements Query {
   constructor(rpc: Rpc) {
     this.rpc = rpc;
     this.Params = this.Params.bind(this);
+    this.SellOrderBook = this.SellOrderBook.bind(this);
+    this.SellOrderBookAll = this.SellOrderBookAll.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
     const promise = this.rpc.request("interchange.dex.Query", "Params", data);
     return promise.then((data) => QueryParamsResponse.decode(new _m0.Reader(data)));
+  }
+
+  SellOrderBook(request: QueryGetSellOrderBookRequest): Promise<QueryGetSellOrderBookResponse> {
+    const data = QueryGetSellOrderBookRequest.encode(request).finish();
+    const promise = this.rpc.request("interchange.dex.Query", "SellOrderBook", data);
+    return promise.then((data) => QueryGetSellOrderBookResponse.decode(new _m0.Reader(data)));
+  }
+
+  SellOrderBookAll(request: QueryAllSellOrderBookRequest): Promise<QueryAllSellOrderBookResponse> {
+    const data = QueryAllSellOrderBookRequest.encode(request).finish();
+    const promise = this.rpc.request("interchange.dex.Query", "SellOrderBookAll", data);
+    return promise.then((data) => QueryAllSellOrderBookResponse.decode(new _m0.Reader(data)));
   }
 }
 

@@ -3,11 +3,13 @@ import { Client, registry, MissingWalletError } from 'interchange-client-ts'
 import { BuyOrderBook } from "interchange-client-ts/interchange.dex/types"
 import { DexPacketData } from "interchange-client-ts/interchange.dex/types"
 import { NoData } from "interchange-client-ts/interchange.dex/types"
+import { CreatePairPacketData } from "interchange-client-ts/interchange.dex/types"
+import { CreatePairPacketAck } from "interchange-client-ts/interchange.dex/types"
 import { Params } from "interchange-client-ts/interchange.dex/types"
 import { SellOrderBook } from "interchange-client-ts/interchange.dex/types"
 
 
-export { BuyOrderBook, DexPacketData, NoData, Params, SellOrderBook };
+export { BuyOrderBook, DexPacketData, NoData, CreatePairPacketData, CreatePairPacketAck, Params, SellOrderBook };
 
 function initClient(vuexGetters) {
 	return new Client(vuexGetters['common/env/getEnv'], vuexGetters['common/wallet/signer'])
@@ -48,6 +50,8 @@ const getDefaultState = () => {
 						BuyOrderBook: getStructure(BuyOrderBook.fromPartial({})),
 						DexPacketData: getStructure(DexPacketData.fromPartial({})),
 						NoData: getStructure(NoData.fromPartial({})),
+						CreatePairPacketData: getStructure(CreatePairPacketData.fromPartial({})),
+						CreatePairPacketAck: getStructure(CreatePairPacketAck.fromPartial({})),
 						Params: getStructure(Params.fromPartial({})),
 						SellOrderBook: getStructure(SellOrderBook.fromPartial({})),
 						
@@ -260,7 +264,33 @@ export default {
 		},
 		
 		
+		async sendMsgSendCreatePair({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.InterchangeDex.tx.sendMsgSendCreatePair({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgSendCreatePair:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgSendCreatePair:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
 		
+		async MsgSendCreatePair({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.InterchangeDex.tx.msgSendCreatePair({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgSendCreatePair:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgSendCreatePair:Create Could not create message: ' + e.message)
+				}
+			}
+		},
 		
 	}
 }

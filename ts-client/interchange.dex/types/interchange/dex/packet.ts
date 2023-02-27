@@ -8,6 +8,10 @@ export interface DexPacketData {
     | NoData
     | undefined;
   /** this line is used by starport scaffolding # ibc/packet/proto/field */
+  buyOrderPacket:
+    | BuyOrderPacketData
+    | undefined;
+  /** this line is used by starport scaffolding # ibc/packet/proto/field/number */
   sellOrderPacket:
     | SellOrderPacketData
     | undefined;
@@ -42,14 +46,31 @@ export interface SellOrderPacketAck {
   gain: number;
 }
 
+/** BuyOrderPacketData defines a struct for the packet payload */
+export interface BuyOrderPacketData {
+  amountDenom: string;
+  amount: number;
+  priceDenom: string;
+  price: number;
+}
+
+/** BuyOrderPacketAck defines a struct for the packet acknowledgment */
+export interface BuyOrderPacketAck {
+  remainingAmount: number;
+  purchase: number;
+}
+
 function createBaseDexPacketData(): DexPacketData {
-  return { noData: undefined, sellOrderPacket: undefined, createPairPacket: undefined };
+  return { noData: undefined, buyOrderPacket: undefined, sellOrderPacket: undefined, createPairPacket: undefined };
 }
 
 export const DexPacketData = {
   encode(message: DexPacketData, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.noData !== undefined) {
       NoData.encode(message.noData, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.buyOrderPacket !== undefined) {
+      BuyOrderPacketData.encode(message.buyOrderPacket, writer.uint32(34).fork()).ldelim();
     }
     if (message.sellOrderPacket !== undefined) {
       SellOrderPacketData.encode(message.sellOrderPacket, writer.uint32(26).fork()).ldelim();
@@ -70,6 +91,9 @@ export const DexPacketData = {
         case 1:
           message.noData = NoData.decode(reader, reader.uint32());
           break;
+        case 4:
+          message.buyOrderPacket = BuyOrderPacketData.decode(reader, reader.uint32());
+          break;
         case 3:
           message.sellOrderPacket = SellOrderPacketData.decode(reader, reader.uint32());
           break;
@@ -87,6 +111,7 @@ export const DexPacketData = {
   fromJSON(object: any): DexPacketData {
     return {
       noData: isSet(object.noData) ? NoData.fromJSON(object.noData) : undefined,
+      buyOrderPacket: isSet(object.buyOrderPacket) ? BuyOrderPacketData.fromJSON(object.buyOrderPacket) : undefined,
       sellOrderPacket: isSet(object.sellOrderPacket) ? SellOrderPacketData.fromJSON(object.sellOrderPacket) : undefined,
       createPairPacket: isSet(object.createPairPacket)
         ? CreatePairPacketData.fromJSON(object.createPairPacket)
@@ -97,6 +122,8 @@ export const DexPacketData = {
   toJSON(message: DexPacketData): unknown {
     const obj: any = {};
     message.noData !== undefined && (obj.noData = message.noData ? NoData.toJSON(message.noData) : undefined);
+    message.buyOrderPacket !== undefined
+      && (obj.buyOrderPacket = message.buyOrderPacket ? BuyOrderPacketData.toJSON(message.buyOrderPacket) : undefined);
     message.sellOrderPacket !== undefined && (obj.sellOrderPacket = message.sellOrderPacket
       ? SellOrderPacketData.toJSON(message.sellOrderPacket)
       : undefined);
@@ -110,6 +137,9 @@ export const DexPacketData = {
     const message = createBaseDexPacketData();
     message.noData = (object.noData !== undefined && object.noData !== null)
       ? NoData.fromPartial(object.noData)
+      : undefined;
+    message.buyOrderPacket = (object.buyOrderPacket !== undefined && object.buyOrderPacket !== null)
+      ? BuyOrderPacketData.fromPartial(object.buyOrderPacket)
       : undefined;
     message.sellOrderPacket = (object.sellOrderPacket !== undefined && object.sellOrderPacket !== null)
       ? SellOrderPacketData.fromPartial(object.sellOrderPacket)
@@ -387,6 +417,140 @@ export const SellOrderPacketAck = {
     const message = createBaseSellOrderPacketAck();
     message.remainingAmount = object.remainingAmount ?? 0;
     message.gain = object.gain ?? 0;
+    return message;
+  },
+};
+
+function createBaseBuyOrderPacketData(): BuyOrderPacketData {
+  return { amountDenom: "", amount: 0, priceDenom: "", price: 0 };
+}
+
+export const BuyOrderPacketData = {
+  encode(message: BuyOrderPacketData, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.amountDenom !== "") {
+      writer.uint32(10).string(message.amountDenom);
+    }
+    if (message.amount !== 0) {
+      writer.uint32(16).int32(message.amount);
+    }
+    if (message.priceDenom !== "") {
+      writer.uint32(26).string(message.priceDenom);
+    }
+    if (message.price !== 0) {
+      writer.uint32(32).int32(message.price);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BuyOrderPacketData {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBuyOrderPacketData();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.amountDenom = reader.string();
+          break;
+        case 2:
+          message.amount = reader.int32();
+          break;
+        case 3:
+          message.priceDenom = reader.string();
+          break;
+        case 4:
+          message.price = reader.int32();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BuyOrderPacketData {
+    return {
+      amountDenom: isSet(object.amountDenom) ? String(object.amountDenom) : "",
+      amount: isSet(object.amount) ? Number(object.amount) : 0,
+      priceDenom: isSet(object.priceDenom) ? String(object.priceDenom) : "",
+      price: isSet(object.price) ? Number(object.price) : 0,
+    };
+  },
+
+  toJSON(message: BuyOrderPacketData): unknown {
+    const obj: any = {};
+    message.amountDenom !== undefined && (obj.amountDenom = message.amountDenom);
+    message.amount !== undefined && (obj.amount = Math.round(message.amount));
+    message.priceDenom !== undefined && (obj.priceDenom = message.priceDenom);
+    message.price !== undefined && (obj.price = Math.round(message.price));
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<BuyOrderPacketData>, I>>(object: I): BuyOrderPacketData {
+    const message = createBaseBuyOrderPacketData();
+    message.amountDenom = object.amountDenom ?? "";
+    message.amount = object.amount ?? 0;
+    message.priceDenom = object.priceDenom ?? "";
+    message.price = object.price ?? 0;
+    return message;
+  },
+};
+
+function createBaseBuyOrderPacketAck(): BuyOrderPacketAck {
+  return { remainingAmount: 0, purchase: 0 };
+}
+
+export const BuyOrderPacketAck = {
+  encode(message: BuyOrderPacketAck, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.remainingAmount !== 0) {
+      writer.uint32(8).int32(message.remainingAmount);
+    }
+    if (message.purchase !== 0) {
+      writer.uint32(16).int32(message.purchase);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BuyOrderPacketAck {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBuyOrderPacketAck();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.remainingAmount = reader.int32();
+          break;
+        case 2:
+          message.purchase = reader.int32();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BuyOrderPacketAck {
+    return {
+      remainingAmount: isSet(object.remainingAmount) ? Number(object.remainingAmount) : 0,
+      purchase: isSet(object.purchase) ? Number(object.purchase) : 0,
+    };
+  },
+
+  toJSON(message: BuyOrderPacketAck): unknown {
+    const obj: any = {};
+    message.remainingAmount !== undefined && (obj.remainingAmount = Math.round(message.remainingAmount));
+    message.purchase !== undefined && (obj.purchase = Math.round(message.purchase));
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<BuyOrderPacketAck>, I>>(object: I): BuyOrderPacketAck {
+    const message = createBaseBuyOrderPacketAck();
+    message.remainingAmount = object.remainingAmount ?? 0;
+    message.purchase = object.purchase ?? 0;
     return message;
   },
 };

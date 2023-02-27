@@ -5,6 +5,8 @@ import { CreatePairPacketData } from "./types/interchange/dex/packet"
 import { CreatePairPacketAck } from "./types/interchange/dex/packet"
 import { SellOrderPacketData } from "./types/interchange/dex/packet"
 import { SellOrderPacketAck } from "./types/interchange/dex/packet"
+import { BuyOrderPacketData } from "./types/interchange/dex/packet"
+import { BuyOrderPacketAck } from "./types/interchange/dex/packet"
 import { Params } from "./types/interchange/dex/params"
 import { SellOrderBook } from "./types/interchange/dex/sell_order_book"
 
@@ -17,6 +19,8 @@ export {
     CreatePairPacketAck,
     SellOrderPacketData,
     SellOrderPacketAck,
+    BuyOrderPacketData,
+    BuyOrderPacketAck,
     Params,
     SellOrderBook,
     

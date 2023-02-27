@@ -9,10 +9,11 @@ import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
 import { MsgSendCreatePair } from "./types/interchange/dex/tx";
 import { MsgSendSellOrder } from "./types/interchange/dex/tx";
+import { MsgCancelSellOrder } from "./types/interchange/dex/tx";
 import { MsgSendBuyOrder } from "./types/interchange/dex/tx";
 
 
-export { MsgSendCreatePair, MsgSendSellOrder, MsgSendBuyOrder };
+export { MsgSendCreatePair, MsgSendSellOrder, MsgCancelSellOrder, MsgSendBuyOrder };
 
 type sendMsgSendCreatePairParams = {
   value: MsgSendCreatePair,
@@ -22,6 +23,12 @@ type sendMsgSendCreatePairParams = {
 
 type sendMsgSendSellOrderParams = {
   value: MsgSendSellOrder,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgCancelSellOrderParams = {
+  value: MsgCancelSellOrder,
   fee?: StdFee,
   memo?: string
 };
@@ -39,6 +46,10 @@ type msgSendCreatePairParams = {
 
 type msgSendSellOrderParams = {
   value: MsgSendSellOrder,
+};
+
+type msgCancelSellOrderParams = {
+  value: MsgCancelSellOrder,
 };
 
 type msgSendBuyOrderParams = {
@@ -91,6 +102,20 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
+		async sendMsgCancelSellOrder({ value, fee, memo }: sendMsgCancelSellOrderParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgCancelSellOrder: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgCancelSellOrder({ value: MsgCancelSellOrder.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgCancelSellOrder: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
 		async sendMsgSendBuyOrder({ value, fee, memo }: sendMsgSendBuyOrderParams): Promise<DeliverTxResponse> {
 			if (!signer) {
 					throw new Error('TxClient:sendMsgSendBuyOrder: Unable to sign Tx. Signer is not present.')
@@ -119,6 +144,14 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return { typeUrl: "/interchange.dex.MsgSendSellOrder", value: MsgSendSellOrder.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgSendSellOrder: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgCancelSellOrder({ value }: msgCancelSellOrderParams): EncodeObject {
+			try {
+				return { typeUrl: "/interchange.dex.MsgCancelSellOrder", value: MsgCancelSellOrder.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgCancelSellOrder: Could not create message: ' + e.message)
 			}
 		},
 		

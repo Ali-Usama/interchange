@@ -298,6 +298,19 @@ export default {
 				}
 			}
 		},
+		async sendMsgCancelSellOrder({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.InterchangeDex.tx.sendMsgCancelSellOrder({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgCancelSellOrder:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgCancelSellOrder:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
 		async sendMsgSendBuyOrder({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -335,6 +348,19 @@ export default {
 					throw new Error('TxClient:MsgSendSellOrder:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgSendSellOrder:Create Could not create message: ' + e.message)
+				}
+			}
+		},
+		async MsgCancelSellOrder({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.InterchangeDex.tx.msgCancelSellOrder({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgCancelSellOrder:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgCancelSellOrder:Create Could not create message: ' + e.message)
 				}
 			}
 		},

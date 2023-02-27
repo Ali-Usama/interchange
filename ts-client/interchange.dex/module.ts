@@ -7,14 +7,26 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
+import { MsgCancelBuyOrder } from "./types/interchange/dex/tx";
+import { MsgSendBuyOrder } from "./types/interchange/dex/tx";
 import { MsgSendSellOrder } from "./types/interchange/dex/tx";
 import { MsgSendCreatePair } from "./types/interchange/dex/tx";
 import { MsgCancelSellOrder } from "./types/interchange/dex/tx";
-import { MsgCancelBuyOrder } from "./types/interchange/dex/tx";
-import { MsgSendBuyOrder } from "./types/interchange/dex/tx";
 
 
-export { MsgSendSellOrder, MsgSendCreatePair, MsgCancelSellOrder, MsgCancelBuyOrder, MsgSendBuyOrder };
+export { MsgCancelBuyOrder, MsgSendBuyOrder, MsgSendSellOrder, MsgSendCreatePair, MsgCancelSellOrder };
+
+type sendMsgCancelBuyOrderParams = {
+  value: MsgCancelBuyOrder,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgSendBuyOrderParams = {
+  value: MsgSendBuyOrder,
+  fee?: StdFee,
+  memo?: string
+};
 
 type sendMsgSendSellOrderParams = {
   value: MsgSendSellOrder,
@@ -34,18 +46,14 @@ type sendMsgCancelSellOrderParams = {
   memo?: string
 };
 
-type sendMsgCancelBuyOrderParams = {
+
+type msgCancelBuyOrderParams = {
   value: MsgCancelBuyOrder,
-  fee?: StdFee,
-  memo?: string
 };
 
-type sendMsgSendBuyOrderParams = {
+type msgSendBuyOrderParams = {
   value: MsgSendBuyOrder,
-  fee?: StdFee,
-  memo?: string
 };
-
 
 type msgSendSellOrderParams = {
   value: MsgSendSellOrder,
@@ -57,14 +65,6 @@ type msgSendCreatePairParams = {
 
 type msgCancelSellOrderParams = {
   value: MsgCancelSellOrder,
-};
-
-type msgCancelBuyOrderParams = {
-  value: MsgCancelBuyOrder,
-};
-
-type msgSendBuyOrderParams = {
-  value: MsgSendBuyOrder,
 };
 
 
@@ -84,6 +84,34 @@ interface TxClientOptions {
 export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "http://localhost:26657", prefix: "cosmos" }) => {
 
   return {
+		
+		async sendMsgCancelBuyOrder({ value, fee, memo }: sendMsgCancelBuyOrderParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgCancelBuyOrder: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgCancelBuyOrder({ value: MsgCancelBuyOrder.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgCancelBuyOrder: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgSendBuyOrder({ value, fee, memo }: sendMsgSendBuyOrderParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgSendBuyOrder: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgSendBuyOrder({ value: MsgSendBuyOrder.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgSendBuyOrder: Could not broadcast Tx: '+ e.message)
+			}
+		},
 		
 		async sendMsgSendSellOrder({ value, fee, memo }: sendMsgSendSellOrderParams): Promise<DeliverTxResponse> {
 			if (!signer) {
@@ -127,34 +155,22 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgCancelBuyOrder({ value, fee, memo }: sendMsgCancelBuyOrderParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgCancelBuyOrder: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgCancelBuyOrder({ value: MsgCancelBuyOrder.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+		
+		msgCancelBuyOrder({ value }: msgCancelBuyOrderParams): EncodeObject {
+			try {
+				return { typeUrl: "/interchange.dex.MsgCancelBuyOrder", value: MsgCancelBuyOrder.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgCancelBuyOrder: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:MsgCancelBuyOrder: Could not create message: ' + e.message)
 			}
 		},
 		
-		async sendMsgSendBuyOrder({ value, fee, memo }: sendMsgSendBuyOrderParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgSendBuyOrder: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgSendBuyOrder({ value: MsgSendBuyOrder.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+		msgSendBuyOrder({ value }: msgSendBuyOrderParams): EncodeObject {
+			try {
+				return { typeUrl: "/interchange.dex.MsgSendBuyOrder", value: MsgSendBuyOrder.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgSendBuyOrder: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:MsgSendBuyOrder: Could not create message: ' + e.message)
 			}
 		},
-		
 		
 		msgSendSellOrder({ value }: msgSendSellOrderParams): EncodeObject {
 			try {
@@ -177,22 +193,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return { typeUrl: "/interchange.dex.MsgCancelSellOrder", value: MsgCancelSellOrder.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgCancelSellOrder: Could not create message: ' + e.message)
-			}
-		},
-		
-		msgCancelBuyOrder({ value }: msgCancelBuyOrderParams): EncodeObject {
-			try {
-				return { typeUrl: "/interchange.dex.MsgCancelBuyOrder", value: MsgCancelBuyOrder.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgCancelBuyOrder: Could not create message: ' + e.message)
-			}
-		},
-		
-		msgSendBuyOrder({ value }: msgSendBuyOrderParams): EncodeObject {
-			try {
-				return { typeUrl: "/interchange.dex.MsgSendBuyOrder", value: MsgSendBuyOrder.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgSendBuyOrder: Could not create message: ' + e.message)
 			}
 		},
 		

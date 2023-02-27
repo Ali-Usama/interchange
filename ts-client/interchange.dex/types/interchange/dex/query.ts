@@ -2,6 +2,7 @@
 import _m0 from "protobufjs/minimal";
 import { PageRequest, PageResponse } from "../../cosmos/base/query/v1beta1/pagination";
 import { BuyOrderBook } from "./buy_order_book";
+import { DenomTrace } from "./denom_trace";
 import { Params } from "./params";
 import { SellOrderBook } from "./sell_order_book";
 
@@ -48,6 +49,23 @@ export interface QueryAllBuyOrderBookRequest {
 
 export interface QueryAllBuyOrderBookResponse {
   buyOrderBook: BuyOrderBook[];
+  pagination: PageResponse | undefined;
+}
+
+export interface QueryGetDenomTraceRequest {
+  index: string;
+}
+
+export interface QueryGetDenomTraceResponse {
+  denomTrace: DenomTrace | undefined;
+}
+
+export interface QueryAllDenomTraceRequest {
+  pagination: PageRequest | undefined;
+}
+
+export interface QueryAllDenomTraceResponse {
+  denomTrace: DenomTrace[];
   pagination: PageResponse | undefined;
 }
 
@@ -571,6 +589,218 @@ export const QueryAllBuyOrderBookResponse = {
   },
 };
 
+function createBaseQueryGetDenomTraceRequest(): QueryGetDenomTraceRequest {
+  return { index: "" };
+}
+
+export const QueryGetDenomTraceRequest = {
+  encode(message: QueryGetDenomTraceRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.index !== "") {
+      writer.uint32(10).string(message.index);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetDenomTraceRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetDenomTraceRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.index = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetDenomTraceRequest {
+    return { index: isSet(object.index) ? String(object.index) : "" };
+  },
+
+  toJSON(message: QueryGetDenomTraceRequest): unknown {
+    const obj: any = {};
+    message.index !== undefined && (obj.index = message.index);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryGetDenomTraceRequest>, I>>(object: I): QueryGetDenomTraceRequest {
+    const message = createBaseQueryGetDenomTraceRequest();
+    message.index = object.index ?? "";
+    return message;
+  },
+};
+
+function createBaseQueryGetDenomTraceResponse(): QueryGetDenomTraceResponse {
+  return { denomTrace: undefined };
+}
+
+export const QueryGetDenomTraceResponse = {
+  encode(message: QueryGetDenomTraceResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.denomTrace !== undefined) {
+      DenomTrace.encode(message.denomTrace, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetDenomTraceResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetDenomTraceResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.denomTrace = DenomTrace.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetDenomTraceResponse {
+    return { denomTrace: isSet(object.denomTrace) ? DenomTrace.fromJSON(object.denomTrace) : undefined };
+  },
+
+  toJSON(message: QueryGetDenomTraceResponse): unknown {
+    const obj: any = {};
+    message.denomTrace !== undefined
+      && (obj.denomTrace = message.denomTrace ? DenomTrace.toJSON(message.denomTrace) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryGetDenomTraceResponse>, I>>(object: I): QueryGetDenomTraceResponse {
+    const message = createBaseQueryGetDenomTraceResponse();
+    message.denomTrace = (object.denomTrace !== undefined && object.denomTrace !== null)
+      ? DenomTrace.fromPartial(object.denomTrace)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryAllDenomTraceRequest(): QueryAllDenomTraceRequest {
+  return { pagination: undefined };
+}
+
+export const QueryAllDenomTraceRequest = {
+  encode(message: QueryAllDenomTraceRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.pagination !== undefined) {
+      PageRequest.encode(message.pagination, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryAllDenomTraceRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryAllDenomTraceRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.pagination = PageRequest.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryAllDenomTraceRequest {
+    return { pagination: isSet(object.pagination) ? PageRequest.fromJSON(object.pagination) : undefined };
+  },
+
+  toJSON(message: QueryAllDenomTraceRequest): unknown {
+    const obj: any = {};
+    message.pagination !== undefined
+      && (obj.pagination = message.pagination ? PageRequest.toJSON(message.pagination) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryAllDenomTraceRequest>, I>>(object: I): QueryAllDenomTraceRequest {
+    const message = createBaseQueryAllDenomTraceRequest();
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageRequest.fromPartial(object.pagination)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryAllDenomTraceResponse(): QueryAllDenomTraceResponse {
+  return { denomTrace: [], pagination: undefined };
+}
+
+export const QueryAllDenomTraceResponse = {
+  encode(message: QueryAllDenomTraceResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.denomTrace) {
+      DenomTrace.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.pagination !== undefined) {
+      PageResponse.encode(message.pagination, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryAllDenomTraceResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryAllDenomTraceResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.denomTrace.push(DenomTrace.decode(reader, reader.uint32()));
+          break;
+        case 2:
+          message.pagination = PageResponse.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryAllDenomTraceResponse {
+    return {
+      denomTrace: Array.isArray(object?.denomTrace) ? object.denomTrace.map((e: any) => DenomTrace.fromJSON(e)) : [],
+      pagination: isSet(object.pagination) ? PageResponse.fromJSON(object.pagination) : undefined,
+    };
+  },
+
+  toJSON(message: QueryAllDenomTraceResponse): unknown {
+    const obj: any = {};
+    if (message.denomTrace) {
+      obj.denomTrace = message.denomTrace.map((e) => e ? DenomTrace.toJSON(e) : undefined);
+    } else {
+      obj.denomTrace = [];
+    }
+    message.pagination !== undefined
+      && (obj.pagination = message.pagination ? PageResponse.toJSON(message.pagination) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryAllDenomTraceResponse>, I>>(object: I): QueryAllDenomTraceResponse {
+    const message = createBaseQueryAllDenomTraceResponse();
+    message.denomTrace = object.denomTrace?.map((e) => DenomTrace.fromPartial(e)) || [];
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageResponse.fromPartial(object.pagination)
+      : undefined;
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
@@ -583,6 +813,10 @@ export interface Query {
   BuyOrderBook(request: QueryGetBuyOrderBookRequest): Promise<QueryGetBuyOrderBookResponse>;
   /** Queries a list of BuyOrderBook items. */
   BuyOrderBookAll(request: QueryAllBuyOrderBookRequest): Promise<QueryAllBuyOrderBookResponse>;
+  /** Queries a DenomTrace by index. */
+  DenomTrace(request: QueryGetDenomTraceRequest): Promise<QueryGetDenomTraceResponse>;
+  /** Queries a list of DenomTrace items. */
+  DenomTraceAll(request: QueryAllDenomTraceRequest): Promise<QueryAllDenomTraceResponse>;
 }
 
 export class QueryClientImpl implements Query {
@@ -594,6 +828,8 @@ export class QueryClientImpl implements Query {
     this.SellOrderBookAll = this.SellOrderBookAll.bind(this);
     this.BuyOrderBook = this.BuyOrderBook.bind(this);
     this.BuyOrderBookAll = this.BuyOrderBookAll.bind(this);
+    this.DenomTrace = this.DenomTrace.bind(this);
+    this.DenomTraceAll = this.DenomTraceAll.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
@@ -623,6 +859,18 @@ export class QueryClientImpl implements Query {
     const data = QueryAllBuyOrderBookRequest.encode(request).finish();
     const promise = this.rpc.request("interchange.dex.Query", "BuyOrderBookAll", data);
     return promise.then((data) => QueryAllBuyOrderBookResponse.decode(new _m0.Reader(data)));
+  }
+
+  DenomTrace(request: QueryGetDenomTraceRequest): Promise<QueryGetDenomTraceResponse> {
+    const data = QueryGetDenomTraceRequest.encode(request).finish();
+    const promise = this.rpc.request("interchange.dex.Query", "DenomTrace", data);
+    return promise.then((data) => QueryGetDenomTraceResponse.decode(new _m0.Reader(data)));
+  }
+
+  DenomTraceAll(request: QueryAllDenomTraceRequest): Promise<QueryAllDenomTraceResponse> {
+    const data = QueryAllDenomTraceRequest.encode(request).finish();
+    const promise = this.rpc.request("interchange.dex.Query", "DenomTraceAll", data);
+    return promise.then((data) => QueryAllDenomTraceResponse.decode(new _m0.Reader(data)));
   }
 }
 

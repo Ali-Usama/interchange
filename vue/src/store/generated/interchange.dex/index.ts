@@ -1,6 +1,7 @@
 import { Client, registry, MissingWalletError } from 'interchange-client-ts'
 
 import { BuyOrderBook } from "interchange-client-ts/interchange.dex/types"
+import { DenomTrace } from "interchange-client-ts/interchange.dex/types"
 import { DexPacketData } from "interchange-client-ts/interchange.dex/types"
 import { NoData } from "interchange-client-ts/interchange.dex/types"
 import { CreatePairPacketData } from "interchange-client-ts/interchange.dex/types"
@@ -13,7 +14,7 @@ import { Params } from "interchange-client-ts/interchange.dex/types"
 import { SellOrderBook } from "interchange-client-ts/interchange.dex/types"
 
 
-export { BuyOrderBook, DexPacketData, NoData, CreatePairPacketData, CreatePairPacketAck, SellOrderPacketData, SellOrderPacketAck, BuyOrderPacketData, BuyOrderPacketAck, Params, SellOrderBook };
+export { BuyOrderBook, DenomTrace, DexPacketData, NoData, CreatePairPacketData, CreatePairPacketAck, SellOrderPacketData, SellOrderPacketAck, BuyOrderPacketData, BuyOrderPacketAck, Params, SellOrderBook };
 
 function initClient(vuexGetters) {
 	return new Client(vuexGetters['common/env/getEnv'], vuexGetters['common/wallet/signer'])
@@ -49,9 +50,12 @@ const getDefaultState = () => {
 				SellOrderBookAll: {},
 				BuyOrderBook: {},
 				BuyOrderBookAll: {},
+				DenomTrace: {},
+				DenomTraceAll: {},
 				
 				_Structure: {
 						BuyOrderBook: getStructure(BuyOrderBook.fromPartial({})),
+						DenomTrace: getStructure(DenomTrace.fromPartial({})),
 						DexPacketData: getStructure(DexPacketData.fromPartial({})),
 						NoData: getStructure(NoData.fromPartial({})),
 						CreatePairPacketData: getStructure(CreatePairPacketData.fromPartial({})),
@@ -119,6 +123,18 @@ export default {
 						(<any> params).query=null
 					}
 			return state.BuyOrderBookAll[JSON.stringify(params)] ?? {}
+		},
+				getDenomTrace: (state) => (params = { params: {}}) => {
+					if (!(<any> params).query) {
+						(<any> params).query=null
+					}
+			return state.DenomTrace[JSON.stringify(params)] ?? {}
+		},
+				getDenomTraceAll: (state) => (params = { params: {}}) => {
+					if (!(<any> params).query) {
+						(<any> params).query=null
+					}
+			return state.DenomTraceAll[JSON.stringify(params)] ?? {}
 		},
 				
 		getTypeStructure: (state) => (type) => {
@@ -272,6 +288,80 @@ export default {
 		},
 		
 		
+		
+		
+		 		
+		
+		
+		async QueryDenomTrace({ commit, rootGetters, getters }, { options: { subscribe, all} = { subscribe:false, all:false}, params, query=null }) {
+			try {
+				const key = params ?? {};
+				const client = initClient(rootGetters);
+				let value= (await client.InterchangeDex.query.queryDenomTrace( key.index)).data
+				
+					
+				commit('QUERY', { query: 'DenomTrace', key: { params: {...key}, query}, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryDenomTrace', payload: { options: { all }, params: {...key},query }})
+				return getters['getDenomTrace']( { params: {...key}, query}) ?? {}
+			} catch (e) {
+				throw new Error('QueryClient:QueryDenomTrace API Node Unavailable. Could not perform query: ' + e.message)
+				
+			}
+		},
+		
+		
+		
+		
+		 		
+		
+		
+		async QueryDenomTraceAll({ commit, rootGetters, getters }, { options: { subscribe, all} = { subscribe:false, all:false}, params, query=null }) {
+			try {
+				const key = params ?? {};
+				const client = initClient(rootGetters);
+				let value= (await client.InterchangeDex.query.queryDenomTraceAll(query ?? undefined)).data
+				
+					
+				while (all && (<any> value).pagination && (<any> value).pagination.next_key!=null) {
+					let next_values=(await client.InterchangeDex.query.queryDenomTraceAll({...query ?? {}, 'pagination.key':(<any> value).pagination.next_key} as any)).data
+					value = mergeResults(value, next_values);
+				}
+				commit('QUERY', { query: 'DenomTraceAll', key: { params: {...key}, query}, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryDenomTraceAll', payload: { options: { all }, params: {...key},query }})
+				return getters['getDenomTraceAll']( { params: {...key}, query}) ?? {}
+			} catch (e) {
+				throw new Error('QueryClient:QueryDenomTraceAll API Node Unavailable. Could not perform query: ' + e.message)
+				
+			}
+		},
+		
+		
+		async sendMsgCancelBuyOrder({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.InterchangeDex.tx.sendMsgCancelBuyOrder({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgCancelBuyOrder:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgCancelBuyOrder:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
+		async sendMsgSendBuyOrder({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.InterchangeDex.tx.sendMsgSendBuyOrder({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgSendBuyOrder:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgSendBuyOrder:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
 		async sendMsgSendSellOrder({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -311,33 +401,33 @@ export default {
 				}
 			}
 		},
-		async sendMsgCancelBuyOrder({ rootGetters }, { value, fee = [], memo = '' }) {
+		
+		async MsgCancelBuyOrder({ rootGetters }, { value }) {
 			try {
-				const client=await initClient(rootGetters)
-				const result = await client.InterchangeDex.tx.sendMsgCancelBuyOrder({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
+				const client=initClient(rootGetters)
+				const msg = await client.InterchangeDex.tx.msgCancelBuyOrder({value})
+				return msg
 			} catch (e) {
 				if (e == MissingWalletError) {
 					throw new Error('TxClient:MsgCancelBuyOrder:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgCancelBuyOrder:Send Could not broadcast Tx: '+ e.message)
+				} else{
+					throw new Error('TxClient:MsgCancelBuyOrder:Create Could not create message: ' + e.message)
 				}
 			}
 		},
-		async sendMsgSendBuyOrder({ rootGetters }, { value, fee = [], memo = '' }) {
+		async MsgSendBuyOrder({ rootGetters }, { value }) {
 			try {
-				const client=await initClient(rootGetters)
-				const result = await client.InterchangeDex.tx.sendMsgSendBuyOrder({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
+				const client=initClient(rootGetters)
+				const msg = await client.InterchangeDex.tx.msgSendBuyOrder({value})
+				return msg
 			} catch (e) {
 				if (e == MissingWalletError) {
 					throw new Error('TxClient:MsgSendBuyOrder:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgSendBuyOrder:Send Could not broadcast Tx: '+ e.message)
+				} else{
+					throw new Error('TxClient:MsgSendBuyOrder:Create Could not create message: ' + e.message)
 				}
 			}
 		},
-		
 		async MsgSendSellOrder({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
@@ -374,32 +464,6 @@ export default {
 					throw new Error('TxClient:MsgCancelSellOrder:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgCancelSellOrder:Create Could not create message: ' + e.message)
-				}
-			}
-		},
-		async MsgCancelBuyOrder({ rootGetters }, { value }) {
-			try {
-				const client=initClient(rootGetters)
-				const msg = await client.InterchangeDex.tx.msgCancelBuyOrder({value})
-				return msg
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgCancelBuyOrder:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgCancelBuyOrder:Create Could not create message: ' + e.message)
-				}
-			}
-		},
-		async MsgSendBuyOrder({ rootGetters }, { value }) {
-			try {
-				const client=initClient(rootGetters)
-				const msg = await client.InterchangeDex.tx.msgSendBuyOrder({value})
-				return msg
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgSendBuyOrder:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgSendBuyOrder:Create Could not create message: ' + e.message)
 				}
 			}
 		},

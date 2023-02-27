@@ -1,6 +1,7 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
 import { BuyOrderBook } from "./buy_order_book";
+import { DenomTrace } from "./denom_trace";
 import { Params } from "./params";
 import { SellOrderBook } from "./sell_order_book";
 
@@ -11,12 +12,13 @@ export interface GenesisState {
   params: Params | undefined;
   portId: string;
   sellOrderBookList: SellOrderBook[];
-  /** this line is used by starport scaffolding # genesis/proto/state */
   buyOrderBookList: BuyOrderBook[];
+  /** this line is used by starport scaffolding # genesis/proto/state */
+  denomTraceList: DenomTrace[];
 }
 
 function createBaseGenesisState(): GenesisState {
-  return { params: undefined, portId: "", sellOrderBookList: [], buyOrderBookList: [] };
+  return { params: undefined, portId: "", sellOrderBookList: [], buyOrderBookList: [], denomTraceList: [] };
 }
 
 export const GenesisState = {
@@ -32,6 +34,9 @@ export const GenesisState = {
     }
     for (const v of message.buyOrderBookList) {
       BuyOrderBook.encode(v!, writer.uint32(34).fork()).ldelim();
+    }
+    for (const v of message.denomTraceList) {
+      DenomTrace.encode(v!, writer.uint32(42).fork()).ldelim();
     }
     return writer;
   },
@@ -55,6 +60,9 @@ export const GenesisState = {
         case 4:
           message.buyOrderBookList.push(BuyOrderBook.decode(reader, reader.uint32()));
           break;
+        case 5:
+          message.denomTraceList.push(DenomTrace.decode(reader, reader.uint32()));
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -73,6 +81,9 @@ export const GenesisState = {
       buyOrderBookList: Array.isArray(object?.buyOrderBookList)
         ? object.buyOrderBookList.map((e: any) => BuyOrderBook.fromJSON(e))
         : [],
+      denomTraceList: Array.isArray(object?.denomTraceList)
+        ? object.denomTraceList.map((e: any) => DenomTrace.fromJSON(e))
+        : [],
     };
   },
 
@@ -90,6 +101,11 @@ export const GenesisState = {
     } else {
       obj.buyOrderBookList = [];
     }
+    if (message.denomTraceList) {
+      obj.denomTraceList = message.denomTraceList.map((e) => e ? DenomTrace.toJSON(e) : undefined);
+    } else {
+      obj.denomTraceList = [];
+    }
     return obj;
   },
 
@@ -101,6 +117,7 @@ export const GenesisState = {
     message.portId = object.portId ?? "";
     message.sellOrderBookList = object.sellOrderBookList?.map((e) => SellOrderBook.fromPartial(e)) || [];
     message.buyOrderBookList = object.buyOrderBookList?.map((e) => BuyOrderBook.fromPartial(e)) || [];
+    message.denomTraceList = object.denomTraceList?.map((e) => DenomTrace.fromPartial(e)) || [];
     return message;
   },
 };
